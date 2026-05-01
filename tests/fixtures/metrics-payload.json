@@ -1,0 +1,125 @@
+{
+  "data": {
+    "metrics": [
+      {
+        "name": "weight_body_mass",
+        "units": "lb",
+        "data": [
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 231.4, "source": "Wyze" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 230.9, "source": "Wyze" }
+        ]
+      },
+      {
+        "name": "lean_body_mass",
+        "units": "lb",
+        "data": [
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 186.1, "source": "Wyze" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 186.3, "source": "Wyze" }
+        ]
+      },
+      {
+        "name": "body_fat_percentage",
+        "units": "%",
+        "data": [
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 19.5, "source": "Wyze" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 19.3, "source": "Wyze" }
+        ]
+      },
+      {
+        "name": "body_mass_index",
+        "units": "count",
+        "data": [
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 26.75, "source": "Wyze" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 26.69, "source": "Wyze" }
+        ]
+      },
+      {
+        "name": "resting_heart_rate",
+        "units": "count/min",
+        "data": [
+          { "date": "2026-04-27 00:00:00 -0700", "qty": 60, "source": "WHOOP" },
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 64, "source": "WHOOP" },
+          { "date": "2026-04-29 00:00:00 -0700", "qty": 64, "source": "WHOOP" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 61, "source": "WHOOP" }
+        ]
+      },
+      {
+        "name": "sleep_analysis",
+        "units": "hr",
+        "data": [
+          {
+            "date": "2026-04-27 00:00:00 -0700",
+            "totalSleep": 8.76,
+            "asleep": 8.76,
+            "inBed": 9.41,
+            "awake": 0.65,
+            "sleepStart": "2026-04-26 20:53:27 -0700",
+            "sleepEnd": "2026-04-27 06:18:04 -0700",
+            "inBedStart": "2026-04-26 20:53:27 -0700",
+            "inBedEnd": "2026-04-27 06:18:04 -0700",
+            "deep": 0, "rem": 0, "core": 0,
+            "source": "WHOOP"
+          },
+          {
+            "date": "2026-04-28 00:00:00 -0700",
+            "totalSleep": 7.43,
+            "asleep": 7.43,
+            "inBed": 7.61,
+            "awake": 0.18,
+            "sleepStart": "2026-04-27 22:38:24 -0700",
+            "sleepEnd": "2026-04-28 06:15:01 -0700",
+            "inBedStart": "2026-04-27 22:38:24 -0700",
+            "inBedEnd": "2026-04-28 06:15:01 -0700",
+            "deep": 0, "rem": 0, "core": 0,
+            "source": "WHOOP"
+          },
+          {
+            "date": "2026-04-30 00:00:00 -0700",
+            "totalSleep": 8.07,
+            "asleep": 8.07,
+            "inBed": 8.53,
+            "awake": 0.46,
+            "sleepStart": "2026-04-29 21:48:45 -0700",
+            "sleepEnd": "2026-04-30 06:20:36 -0700",
+            "inBedStart": "2026-04-29 21:48:45 -0700",
+            "inBedEnd": "2026-04-30 06:20:36 -0700",
+            "deep": 0, "rem": 0, "core": 0,
+            "source": "WHOOP"
+          }
+        ]
+      },
+      {
+        "name": "respiratory_rate",
+        "units": "count/min",
+        "data": [
+          { "date": "2026-04-27 00:00:00 -0700", "qty": 14.82, "source": "WHOOP" },
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 14.12, "source": "WHOOP" },
+          { "date": "2026-04-30 00:00:00 -0700", "qty": 13.83, "source": "WHOOP" }
+        ]
+      },
+      {
+        "name": "vo2_max",
+        "units": "ml/(kg·min)",
+        "data": [
+          { "date": "2026-04-27 00:00:00 -0700", "qty": 41.92, "source": "Jacob's Apple Watch" },
+          { "date": "2026-04-28 00:00:00 -0700", "qty": 42.06, "source": "Jacob's Apple Watch" }
+        ]
+      },
+      {
+        "name": "cardio_recovery",
+        "units": "count/min",
+        "data": [
+          { "date": "2026-04-27 00:00:00 -0700", "qty": 29.64, "source": "Jacob's Apple Watch" }
+        ]
+      },
+      {
+        "name": "heart_rate",
+        "units": "count/min",
+        "data": [
+          { "date": "2026-04-27 00:00:00 -0700", "Avg": 129.5, "Min": 70, "Max": 170, "source": "Jacob's Apple Watch|WHOOP" },
+          { "date": "2026-04-28 00:00:00 -0700", "Avg": 121.5, "Min": 77, "Max": 151, "source": "Jacob's Apple Watch|WHOOP" }
+        ]
+      }
+    ]
+  }
+}

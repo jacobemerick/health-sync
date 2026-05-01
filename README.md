@@ -1,29 +1,25 @@
 # health-sync
 
-AWS Lambda function that pipes workout data into a Notion database.
+AWS Lambda functions that pipe Apple Health data into Notion databases.
 
 ---
 
 ## Architecture
 
-```
-1. Workouts occur and are tracked either via the Whoop app directly (for functional workouts) or Apple Watch (for runs).
-  - Whoop sends a single workout to Apple Health
-  - Apple Watch records the run and sends to Whoop, which then sends back to Apple Health (resulting in duplicate workouts logged)
-1. Apple Health data lives locally on the device and DOES NOT have an accessible API or SDK
-1. Health Auto Export (iOS) can sit on the device and sync with third parties
-1. Automated, scheduled payload is sent from device to health-ingest lambda
-1. Lambda then de-duplicates, manipulates, and checks Notion database before insertion
-```
+1. Workouts are tracked by Apple Watch (runs) or WHOOP (functional workouts). Because Apple Watch syncs to WHOOP and WHOOP writes back to Apple Health, runs end up logged twice — once as "Run" and once as "Outdoor Run".
+2. Apple Health has no API; data lives on-device only.
+3. Health Auto Export (iOS) runs on a schedule and POSTs payloads to two Lambda Function URLs.
+4. Each Lambda deduplicates, maps fields, checks for existing Notion rows, and inserts only new records.
 
-This scriopt deduplicates workouts, computes per-zone pace and time from per-minute heart rate data, and checks for existing rows before inserting to stay idempotent.
-Deploys automatically via GitHub Actions on push to `main`, and PRs run the e2e test suite.
+**workouts-ingest** — deduplicates the duplicate-run problem, computes per-zone pace and time from per-minute heart rate data, and writes to the Workouts DB.
+
+**metrics-ingest** — maps daily body composition and recovery metrics to date-keyed rows across the Body Metrics and Daily Recovery DBs.
 
 ---
 
-## Notion database schema
+## Notion database schemas
 
-The Lambda writes to the **Workouts** database (`WORKOUTS_DB_ID`). The database must have these properties:
+### Workouts DB (`WORKOUTS_DB_ID`)
 
 | Property | Type | Notes |
 |---|---|---|
@@ -42,6 +38,34 @@ The Lambda writes to the **Workouts** database (`WORKOUTS_DB_ID`). The database 
 | `Source ID` | Text | Apple Health UUID — used for idempotency |
 | `Z1 Min`–`Z5 Min` | Number | Minutes in each HR zone (runs only) |
 | `Z1 Pace (min/mi)`–`Z5 Pace (min/mi)` | Number | Avg pace in each HR zone (runs only) |
+
+### Body Metrics DB (`BODY_METRICS_DB_ID`)
+
+One row per weigh-in date. Source: Wyze scale via Apple Health.
+
+| Property | Type | Notes |
+|---|---|---|
+| `Name` | Title | Date string (YYYY-MM-DD) |
+| `Date` | Date | Used for idempotency |
+| `Weight (lbs)` | Number | |
+| `Lean Body Mass (lbs)` | Number | |
+| `Body Fat (%)` | Number | |
+| `BMI` | Number | |
+
+### Daily Recovery DB (`DAILY_RECOVERY_DB_ID`)
+
+One row per day. Sources: WHOOP and Apple Watch via Apple Health.
+
+| Property | Type | Notes |
+|---|---|---|
+| `Name` | Title | Date string (YYYY-MM-DD) |
+| `Date` | Date | Used for idempotency |
+| `Resting HR (bpm)` | Number | From WHOOP |
+| `Sleep Duration (hrs)` | Number | Total sleep from WHOOP |
+| `Respiratory Rate (rpm)` | Number | From WHOOP |
+| `VO2 Max (ml/kg/min)` | Number | From Apple Watch |
+| `Cardio Recovery (bpm)` | Number | From Apple Watch |
+| `Avg HR (bpm)` | Number | Daily average |
 
 ---
 
@@ -66,29 +90,35 @@ cp .env.example .env
 | Variable | Description |
 |---|---|
 | `NOTION_TOKEN` | Notion internal integration token (`ntn_...`) |
-| `WORKOUTS_DB_ID` | Notion Sessions database page ID |
+| `WORKOUTS_DB_ID` | Notion Workouts database page ID |
 | `BODY_METRICS_DB_ID` | Notion Body Metrics database page ID |
+| `DAILY_RECOVERY_DB_ID` | Notion Daily Recovery database page ID |
 
 ### 3. Connect Notion integration
 
 In Notion, open each target database and go to `...` → **Connections** → add your integration:
-- Sessions
+- Workouts
 - Body Metrics
+- Daily Recovery
 
 ### 4. Wire up Health Auto Export
 
-After deploy (see below), paste the `health-ingest` Function URL into Health Auto Export:
+After deploy (see below), paste both Function URLs into Health Auto Export as separate webhooks:
+
+**Workouts webhook** (`workouts-ingest` URL):
 - **Format:** JSON
-- **URL:** the Lambda Function URL (from `npx serverless info`)
 - **Data types:** Workouts — with Heart Rate (per-interval) and Heart Rate Recovery enabled; Route and other timeseries disabled
+
+**Metrics webhook** (`metrics-ingest` URL):
+- **Format:** JSON
+- **Data types:** weight_body_mass, lean_body_mass, body_fat_percentage, body_mass_index, resting_heart_rate, sleep_analysis, respiratory_rate, vo2_max, cardio_recovery, heart_rate
+- **Aggregation:** Daily
 
 ---
 
 ## Local dev
 
-The local dev server wraps the Lambda handler in a lightweight Flask HTTP endpoint on port 9000.
-It uses `python:3.14-slim` rather than the official AWS Lambda runtime image — the Lambda-specific runtime behavior (cold starts, RIC invocation format) isn't something the handler logic depends on, and the slim image is significantly smaller.
-The gap that matters — Python version and installed packages — is covered either way.
+The local dev server wraps both Lambda handlers in a lightweight Flask app on port 9000 — workouts at `/`, metrics at `/metrics`. It uses `python:3.14-slim` instead of the official Lambda runtime image; the slim image is smaller and the handler logic doesn't depend on Lambda-specific runtime behavior.
 
 ```bash
 docker compose up
@@ -111,7 +141,7 @@ docker compose up -d
 cd tests && npm test
 ```
 
-Tests cover deduplication, zone pace calculation, idempotency, and core property mapping.
+Tests cover deduplication, zone pace calculation, idempotency, core property mapping, body metrics insertion, and recovery metrics insertion.
 They also run automatically on every PR via GitHub Actions.
 
 ---
@@ -129,7 +159,7 @@ Add these secrets to **GitHub → repo → Settings → Secrets and variables �
 | `NOTION_TOKEN` | Notion integration token |
 | `SERVERLESS_ACCESS_KEY` | Serverless Framework access key (required by v4) |
 
-Push to `main` — the workflow deploys automatically.
+Push to `main` — the workflow deploys automatically. PRs run the e2e test suite.
 
 ### Manual deploy
 
