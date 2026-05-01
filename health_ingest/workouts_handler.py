@@ -157,12 +157,18 @@ def handler(event, context):
         body = json.loads(event.get("body") or "{}")
     except (json.JSONDecodeError, TypeError) as e:
         print(f"JSON parse error: {e}")
-        return {"statusCode": 400, "body": json.dumps({"ok": False, "error": "Invalid JSON"})}
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"ok": False, "error": "Invalid JSON"}),
+        }
 
     workouts_raw = body.get("data", {}).get("workouts", [])
     if not workouts_raw:
         print("No workouts in payload")
-        return {"statusCode": 200, "body": json.dumps({"ok": True, "ingested": 0, "skipped": 0})}
+        return {
+            "statusCode": 200,
+            "body": json.dumps({"ok": True, "ingested": 0, "skipped": 0}),
+        }
 
     workouts = dedup_workouts(workouts_raw)
     print(f"After dedup: {len(workouts)} workouts (was {len(workouts_raw)})")
@@ -182,7 +188,9 @@ def handler(event, context):
 
             hr_data = workout.get("heartRateData", [])
             dist_data = workout.get("walkingAndRunningDistance", [])
-            zone_stats = compute_zone_stats(hr_data, dist_data) if hr_data and dist_data else {}
+            zone_stats = (
+                compute_zone_stats(hr_data, dist_data) if hr_data and dist_data else {}
+            )
 
             notion.create_page(db_id, build_workout_properties(workout, zone_stats))
             print(f"Ingested workout: {name} ({source_id})")
@@ -190,4 +198,7 @@ def handler(event, context):
         except Exception as e:
             print(f"Error processing workout {name} ({source_id}): {e}")
 
-    return {"statusCode": 200, "body": json.dumps({"ok": True, "ingested": ingested, "skipped": skipped})}
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"ok": True, "ingested": ingested, "skipped": skipped}),
+    }
