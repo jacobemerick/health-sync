@@ -1,6 +1,6 @@
 const axios = require('axios');
 const NotionMock = require('../setup/notion-mock');
-const workoutPayload = require('../fixtures/workout-payload.json');
+const workoutPayload = require('../fixtures/workouts-payload.json');
 
 const LAMBDA_URL = 'http://localhost:9000';
 let notionMock;
