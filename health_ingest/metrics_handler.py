@@ -14,8 +14,20 @@ import os
 from health_ingest import notion
 from health_ingest.utils import parse_date
 
-BODY_METRIC_NAMES = {"weight_body_mass", "lean_body_mass", "body_fat_percentage", "body_mass_index"}
-RECOVERY_METRIC_NAMES = {"resting_heart_rate", "sleep_analysis", "respiratory_rate", "vo2_max", "cardio_recovery", "heart_rate"}
+BODY_METRIC_NAMES = {
+    "weight_body_mass",
+    "lean_body_mass",
+    "body_fat_percentage",
+    "body_mass_index",
+}
+RECOVERY_METRIC_NAMES = {
+    "resting_heart_rate",
+    "sleep_analysis",
+    "respiratory_rate",
+    "vo2_max",
+    "cardio_recovery",
+    "heart_rate",
+}
 
 
 def _entry_for_date(entries, date_str):
@@ -94,12 +106,18 @@ def handler(event, context):
         body = json.loads(event.get("body") or "{}")
     except (json.JSONDecodeError, TypeError) as e:
         print(f"JSON parse error: {e}")
-        return {"statusCode": 400, "body": json.dumps({"ok": False, "error": "Invalid JSON"})}
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"ok": False, "error": "Invalid JSON"}),
+        }
 
     metrics_list = body.get("data", {}).get("metrics", [])
     if not metrics_list:
         print("No metrics in payload")
-        return {"statusCode": 200, "body": json.dumps({"ok": True, "body_metrics": 0, "recovery": 0})}
+        return {
+            "statusCode": 200,
+            "body": json.dumps({"ok": True, "body_metrics": 0, "recovery": 0}),
+        }
 
     metrics_by_name = {m["name"]: m.get("data", []) for m in metrics_list}
 
@@ -143,11 +161,13 @@ def handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps({
-            "ok": True,
-            "body_metrics": body_inserted,
-            "body_metrics_skipped": body_skipped,
-            "recovery": recovery_inserted,
-            "recovery_skipped": recovery_skipped,
-        }),
+        "body": json.dumps(
+            {
+                "ok": True,
+                "body_metrics": body_inserted,
+                "body_metrics_skipped": body_skipped,
+                "recovery": recovery_inserted,
+                "recovery_skipped": recovery_skipped,
+            }
+        ),
     }
