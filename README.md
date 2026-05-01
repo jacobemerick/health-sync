@@ -21,6 +21,30 @@ Deploys automatically via GitHub Actions on push to `main`, and PRs run the e2e 
 
 ---
 
+## Notion database schema
+
+The Lambda writes to the **Workouts** database (`WORKOUTS_DB_ID`). The database must have these properties:
+
+| Property | Type | Notes |
+|---|---|---|
+| `Workout Name` | Title | |
+| `Date` | Date | |
+| `Type` | Select | Options: Run, Hike, Strength, Recovery |
+| `Status` | Select | Options: Completed |
+| `Duration` | Number | Minutes |
+| `Distance` | Number | Miles (runs only) |
+| `Avg Pace` | Text | Format: `MM:SS/mi` (runs only) |
+| `Avg HR (bpm)` | Number | |
+| `Max HR (bpm)` | Number | |
+| `Calories` | Number | |
+| `Avg Cadence` | Number | Steps/min |
+| `Temperature (°F)` | Number | |
+| `Source ID` | Text | Apple Health UUID — used for idempotency |
+| `Z1 Min`–`Z5 Min` | Number | Minutes in each HR zone (runs only) |
+| `Z1 Pace (min/mi)`–`Z5 Pace (min/mi)` | Number | Avg pace in each HR zone (runs only) |
+
+---
+
 ## First-time setup
 
 ### 1. Prerequisites
