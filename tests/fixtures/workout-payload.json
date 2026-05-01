@@ -1,0 +1,116 @@
+{
+  "data": {
+    "workouts": [
+      {
+        "id": "WHOOP-DUP-001",
+        "name": "Run",
+        "start": "2026-04-28 17:57:55 -0700",
+        "end": "2026-04-28 18:39:09 -0700",
+        "duration": 2473.2,
+        "activeEnergyBurned": {"qty": 380.0, "units": "kcal"},
+        "avgHeartRate": {"qty": 143.0, "units": "bpm"},
+        "maxHeartRate": {"qty": 151.0, "units": "bpm"},
+        "metadata": {}
+      },
+      {
+        "id": "APPLE-RUN-001",
+        "name": "Outdoor Run",
+        "start": "2026-04-28 17:57:55 -0700",
+        "end": "2026-04-28 18:39:09 -0700",
+        "duration": 2473.2,
+        "activeEnergyBurned": {"qty": 472.5, "units": "kcal"},
+        "distance": {"qty": 3.54, "units": "mi"},
+        "speed": {"qty": 5.16, "units": "mi/hr"},
+        "heartRate": {
+          "min": {"qty": 80, "units": "bpm"},
+          "avg": {"qty": 143.3, "units": "bpm"},
+          "max": {"qty": 151, "units": "bpm"}
+        },
+        "avgHeartRate": {"qty": 143.3, "units": "bpm"},
+        "maxHeartRate": {"qty": 151, "units": "bpm"},
+        "stepCadence": {"qty": 144.5, "units": "count/min"},
+        "temperature": {"qty": 81.8, "units": "degF"},
+        "humidity": {"qty": 14.0, "units": "%"},
+        "isIndoor": false,
+        "location": "Outdoor",
+        "heartRateData": [
+          {"date": "2026-04-28 17:57:55 -0700", "Avg": 130, "Min": 128, "Max": 133, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 17:58:55 -0700", "Avg": 138, "Min": 135, "Max": 141, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 17:59:55 -0700", "Avg": 142, "Min": 139, "Max": 145, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:00:55 -0700", "Avg": 145, "Min": 142, "Max": 148, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:01:55 -0700", "Avg": 148, "Min": 145, "Max": 151, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:02:55 -0700", "Avg": 150, "Min": 147, "Max": 153, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:03:55 -0700", "Avg": 143, "Min": 140, "Max": 146, "units": "bpm", "source": "Jacob's Apple Watch"}
+        ],
+        "heartRateRecovery": [
+          {"date": "2026-04-28 18:39:11 -0700", "Avg": 144, "Min": 144, "Max": 144, "units": "bpm", "source": "Jacob's Apple Watch"}
+        ],
+        "walkingAndRunningDistance": [
+          {"date": "2026-04-28 17:57:55 -0700", "qty": 0.0875, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 17:58:55 -0700", "qty": 0.0910, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 17:59:55 -0700", "qty": 0.0895, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:00:55 -0700", "qty": 0.0880, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:01:55 -0700", "qty": 0.0900, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:02:55 -0700", "qty": 0.0885, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-28 18:03:55 -0700", "qty": 0.0870, "units": "mi", "source": "Jacob's Apple Watch"}
+        ],
+        "metadata": {}
+      },
+      {
+        "id": "APPLE-STR-001",
+        "name": "Functional Strength Training",
+        "start": "2026-04-26 07:15:00 -0700",
+        "end": "2026-04-26 08:00:00 -0700",
+        "duration": 2700.0,
+        "activeEnergyBurned": {"qty": 210.0, "units": "kcal"},
+        "avgHeartRate": {"qty": 118.0, "units": "bpm"},
+        "maxHeartRate": {"qty": 142.0, "units": "bpm"},
+        "metadata": {}
+      },
+      {
+        "id": "APPLE-RUN-002",
+        "name": "Outdoor Run",
+        "start": "2026-04-24 06:30:00 -0700",
+        "end": "2026-04-24 07:12:45 -0700",
+        "duration": 2565.0,
+        "activeEnergyBurned": {"qty": 490.0, "units": "kcal"},
+        "distance": {"qty": 3.72, "units": "mi"},
+        "speed": {"qty": 5.22, "units": "mi/hr"},
+        "heartRate": {
+          "min": {"qty": 82, "units": "bpm"},
+          "avg": {"qty": 141.0, "units": "bpm"},
+          "max": {"qty": 156, "units": "bpm"}
+        },
+        "avgHeartRate": {"qty": 141.0, "units": "bpm"},
+        "maxHeartRate": {"qty": 156, "units": "bpm"},
+        "stepCadence": {"qty": 146.0, "units": "count/min"},
+        "temperature": {"qty": 74.3, "units": "degF"},
+        "humidity": {"qty": 18.0, "units": "%"},
+        "isIndoor": false,
+        "location": "Outdoor",
+        "heartRateData": [
+          {"date": "2026-04-24 06:30:00 -0700", "Avg": 132, "Min": 128, "Max": 136, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:31:00 -0700", "Avg": 139, "Min": 136, "Max": 143, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:32:00 -0700", "Avg": 144, "Min": 141, "Max": 148, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:33:00 -0700", "Avg": 149, "Min": 146, "Max": 153, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:34:00 -0700", "Avg": 153, "Min": 150, "Max": 156, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:35:00 -0700", "Avg": 147, "Min": 144, "Max": 151, "units": "bpm", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:36:00 -0700", "Avg": 140, "Min": 137, "Max": 144, "units": "bpm", "source": "Jacob's Apple Watch"}
+        ],
+        "heartRateRecovery": [
+          {"date": "2026-04-24 07:12:46 -0700", "Avg": 148, "Min": 148, "Max": 148, "units": "bpm", "source": "Jacob's Apple Watch"}
+        ],
+        "walkingAndRunningDistance": [
+          {"date": "2026-04-24 06:30:00 -0700", "qty": 0.0890, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:31:00 -0700", "qty": 0.0920, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:32:00 -0700", "qty": 0.0905, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:33:00 -0700", "qty": 0.0895, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:34:00 -0700", "qty": 0.0915, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:35:00 -0700", "qty": 0.0900, "units": "mi", "source": "Jacob's Apple Watch"},
+          {"date": "2026-04-24 06:36:00 -0700", "qty": 0.0880, "units": "mi", "source": "Jacob's Apple Watch"}
+        ],
+        "metadata": {}
+      }
+    ]
+  }
+}

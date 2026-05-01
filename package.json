@@ -1,0 +1,9 @@
+{
+  "name": "health-sync",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "serverless": "^4.34.0",
+    "serverless-python-requirements": "^6"
+  }
+}

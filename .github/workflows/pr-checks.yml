@@ -1,0 +1,45 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Start Lambda
+        run: docker compose up -d --build
+
+      - name: Wait for Lambda to be ready
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf -X POST http://localhost:9000/ \
+                -H "Content-Type: application/json" \
+                -d '{}' > /dev/null 2>&1; then
+              echo "Lambda ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Lambda did not become ready in time"
+          docker compose logs
+          exit 1
+
+      - name: Run e2e tests
+        working-directory: tests
+        run: npm test
+
+      - name: Stop Lambda
+        if: always()
+        run: docker compose down

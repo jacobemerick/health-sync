@@ -1,0 +1,26 @@
+service: health-sync
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: python3.14
+  region: us-west-2
+  environment:
+    NOTION_TOKEN: ${env:NOTION_TOKEN}
+    WORKOUTS_DB_ID: 6aea67767af443f7b885bc13e760a103
+    BODY_METRICS_DB_ID: 5e3b6f958b674a308ddbcba96402de5c
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+
+functions:
+  health-ingest:
+    handler: health_ingest/handler.handler
+    timeout: 30
+    module: health_ingest
+    url: true  # Lambda Function URL — paste this into Health Auto Export

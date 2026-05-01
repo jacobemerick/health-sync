@@ -1,0 +1,15 @@
+services:
+  lambda:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      NOTION_API_BASE: http://host.docker.internal:3001/v1
+      NOTION_TOKEN: test-token
+      WORKOUTS_DB_ID: 6aea67767af443f7b885bc13e760a103
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./health_ingest:/app/health_ingest
+      - ./local_server.py:/app/local_server.py

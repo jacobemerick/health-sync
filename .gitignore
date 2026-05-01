@@ -1,0 +1,9 @@
+.env
+.serverless/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+.requirements/
+.requirements.zip
