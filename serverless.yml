@@ -10,6 +10,7 @@ provider:
     NOTION_TOKEN: ${env:NOTION_TOKEN}
     WORKOUTS_DB_ID: 6aea67767af443f7b885bc13e760a103
     BODY_METRICS_DB_ID: 5e3b6f958b674a308ddbcba96402de5c
+    DAILY_RECOVERY_DB_ID: a150c31c285a4280bae506087a7d9d45
 
 custom:
   pythonRequirements:
@@ -17,6 +18,10 @@ custom:
 
 functions:
   health-ingest:
-    handler: health_ingest/handler.handler
+    handler: health_ingest/workouts_handler.handler
     timeout: 30
-    url: true  # Lambda Function URL — paste this into Health Auto Export
+    url: true  # Lambda Function URL — workouts webhook in Health Auto Export
+  metrics-ingest:
+    handler: health_ingest/metrics_handler.handler
+    timeout: 30
+    url: true  # Lambda Function URL — metrics webhook in Health Auto Export

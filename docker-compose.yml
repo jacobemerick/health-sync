@@ -8,6 +8,8 @@ services:
       NOTION_API_BASE: http://host.docker.internal:3001/v1
       NOTION_TOKEN: test-token
       WORKOUTS_DB_ID: 6aea67767af443f7b885bc13e760a103
+      BODY_METRICS_DB_ID: 5e3b6f958b674a308ddbcba96402de5c
+      DAILY_RECOVERY_DB_ID: a150c31c285a4280bae506087a7d9d45
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

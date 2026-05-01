@@ -15,12 +15,23 @@ class NotionMock {
 
     this.app.post('/v1/databases/:id/query', (req, res) => {
       this.calls.queries.push({ dbId: req.params.id, body: req.body });
+
       const sourceId = req.body?.filter?.rich_text?.equals;
-      const results = sourceId
-        ? this.calls.pages.filter(p =>
-            p.properties?.['Source ID']?.rich_text?.[0]?.text?.content === sourceId
-          ).map((_, i) => ({ id: `existing-page-${i}` }))
-        : [];
+      const dateEquals = req.body?.filter?.date?.equals;
+      // Scope to pages created in this specific DB
+      const dbPages = this.calls.pages.filter(p => p.parent?.database_id === req.params.id);
+
+      let results = [];
+      if (sourceId) {
+        results = dbPages
+          .filter(p => p.properties?.['Source ID']?.rich_text?.[0]?.text?.content === sourceId)
+          .map((_, i) => ({ id: `existing-page-${i}` }));
+      } else if (dateEquals) {
+        results = dbPages
+          .filter(p => p.properties?.['Date']?.date?.start === dateEquals)
+          .map((_, i) => ({ id: `existing-page-${i}` }));
+      }
+
       res.json({ results, has_more: false });
     });
   }
