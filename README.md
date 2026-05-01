@@ -28,6 +28,7 @@ Deploys automatically via GitHub Actions on push to `main`, and PRs run the e2e 
 - Node 24 + Python 3.14
 - AWS CLI configured (`aws configure`)
 - Serverless Framework v4 (`npm install`)
+- A Serverless Framework account and access key (v4 requires one — get it at [app.serverless.com](https://app.serverless.com) under **org → Access Keys**)
 - A Notion internal integration token with access to the target databases
 
 ### 2. Environment variables
@@ -102,6 +103,7 @@ Add these secrets to **GitHub → repo → Settings → Secrets and variables �
 | `AWS_ACCESS_KEY_ID` | AWS IAM key |
 | `AWS_SECRET_ACCESS_KEY` | AWS IAM secret |
 | `NOTION_TOKEN` | Notion integration token |
+| `SERVERLESS_ACCESS_KEY` | Serverless Framework access key (required by v4) |
 
 Push to `main` — the workflow deploys automatically.
 
