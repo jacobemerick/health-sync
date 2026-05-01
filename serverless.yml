@@ -19,5 +19,4 @@ functions:
   health-ingest:
     handler: health_ingest/handler.handler
     timeout: 30
-    module: health_ingest
     url: true  # Lambda Function URL — paste this into Health Auto Export
