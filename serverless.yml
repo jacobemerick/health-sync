@@ -11,9 +11,6 @@ provider:
     WORKOUTS_DB_ID: 6aea67767af443f7b885bc13e760a103
     BODY_METRICS_DB_ID: 5e3b6f958b674a308ddbcba96402de5c
 
-plugins:
-  - serverless-python-requirements
-
 custom:
   pythonRequirements:
     dockerizePip: non-linux

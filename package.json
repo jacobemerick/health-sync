@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "serverless": "^4.34.0",
+    "serverless": "^4.35.0",
     "serverless-python-requirements": "^6"
   }
 }
