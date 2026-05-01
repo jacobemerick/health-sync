@@ -6,21 +6,14 @@ AWS Lambda functions that pipe Apple Health data into Notion databases.
 
 ## Architecture
 
-```
-1. Workouts occur and are tracked either via the Whoop app directly (for functional workouts) or Apple Watch (for runs).
-  - Whoop sends a single workout to Apple Health
-  - Apple Watch records the run and sends to Whoop, which then sends back to Apple Health (resulting in duplicate workouts logged)
-1. Apple Health data lives locally on the device and DOES NOT have an accessible API or SDK
-1. Health Auto Export (iOS) can sit on the device and sync with third parties
-1. Automated, scheduled payloads are sent from device to two Lambda Function URLs
-1. Each Lambda deduplicates, maps fields, and checks Notion before inserting to stay idempotent
-```
+1. Workouts are tracked by Apple Watch (runs) or WHOOP (functional workouts). Because Apple Watch syncs to WHOOP and WHOOP writes back to Apple Health, runs end up logged twice — once as "Run" and once as "Outdoor Run".
+2. Apple Health has no API; data lives on-device only.
+3. Health Auto Export (iOS) runs on a schedule and POSTs payloads to two Lambda Function URLs.
+4. Each Lambda deduplicates, maps fields, checks for existing Notion rows, and inserts only new records.
 
-**health-ingest** handles the workouts payload — deduplicates entries, computes per-zone pace and time from per-minute heart rate data, and writes to the Workouts DB.
+**workouts-ingest** — deduplicates the duplicate-run problem, computes per-zone pace and time from per-minute heart rate data, and writes to the Workouts DB.
 
-**metrics-ingest** handles the daily metrics payload — maps body composition and recovery metrics to date-keyed rows across two DBs.
-
-Both deploy automatically via GitHub Actions on push to `main`, and PRs run the e2e test suite.
+**metrics-ingest** — maps daily body composition and recovery metrics to date-keyed rows across the Body Metrics and Daily Recovery DBs.
 
 ---
 
@@ -112,7 +105,7 @@ In Notion, open each target database and go to `...` → **Connections** → add
 
 After deploy (see below), paste both Function URLs into Health Auto Export as separate webhooks:
 
-**Workouts webhook** (`health-ingest` URL):
+**Workouts webhook** (`workouts-ingest` URL):
 - **Format:** JSON
 - **Data types:** Workouts — with Heart Rate (per-interval) and Heart Rate Recovery enabled; Route and other timeseries disabled
 
@@ -125,9 +118,7 @@ After deploy (see below), paste both Function URLs into Health Auto Export as se
 
 ## Local dev
 
-The local dev server wraps both Lambda handlers in a lightweight Flask app on port 9000 — workouts at `/`, metrics at `/metrics`.
-It uses `python:3.14-slim` rather than the official AWS Lambda runtime image — the Lambda-specific runtime behavior (cold starts, RIC invocation format) isn't something the handler logic depends on, and the slim image is significantly smaller.
-The gap that matters — Python version and installed packages — is covered either way.
+The local dev server wraps both Lambda handlers in a lightweight Flask app on port 9000 — workouts at `/`, metrics at `/metrics`. It uses `python:3.14-slim` instead of the official Lambda runtime image; the slim image is smaller and the handler logic doesn't depend on Lambda-specific runtime behavior.
 
 ```bash
 docker compose up
@@ -168,7 +159,7 @@ Add these secrets to **GitHub → repo → Settings → Secrets and variables �
 | `NOTION_TOKEN` | Notion integration token |
 | `SERVERLESS_ACCESS_KEY` | Serverless Framework access key (required by v4) |
 
-Push to `main` — the workflow deploys automatically.
+Push to `main` — the workflow deploys automatically. PRs run the e2e test suite.
 
 ### Manual deploy
 

@@ -151,7 +151,7 @@ def build_workout_properties(workout, zone_stats):
 
 
 def handler(event, context):
-    print("health-ingest invoked")
+    print("workouts-ingest invoked")
 
     try:
         body = json.loads(event.get("body") or "{}")

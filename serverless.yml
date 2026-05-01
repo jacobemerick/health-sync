@@ -17,7 +17,7 @@ custom:
     dockerizePip: non-linux
 
 functions:
-  health-ingest:
+  workouts-ingest:
     handler: health_ingest/workouts_handler.handler
     timeout: 30
     url: true  # Lambda Function URL — workouts webhook in Health Auto Export
