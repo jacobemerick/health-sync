@@ -27,6 +27,7 @@ RECOVERY_METRIC_NAMES = {
     "vo2_max",
     "cardio_recovery",
     "heart_rate",
+    "heart_rate_variability",
 }
 
 
@@ -86,6 +87,10 @@ def build_daily_recovery_properties(date_str, metrics_by_name):
     cardio = _entry_for_date(metrics_by_name.get("cardio_recovery", []), date_str)
     if cardio:
         props["Cardio Recovery (bpm)"] = {"number": round(cardio["qty"], 1)}
+
+    hrv = _entry_for_date(metrics_by_name.get("heart_rate_variability", []), date_str)
+    if hrv:
+        props["HRV (ms)"] = {"number": round(hrv["qty"], 1)}
 
     hr = _entry_for_date(metrics_by_name.get("heart_rate", []), date_str)
     if hr and hr.get("Avg") is not None:

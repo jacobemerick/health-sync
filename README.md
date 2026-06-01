@@ -65,6 +65,7 @@ One row per day. Sources: WHOOP and Apple Watch via Apple Health.
 | `Respiratory Rate (rpm)` | Number | From WHOOP |
 | `VO2 Max (ml/kg/min)` | Number | From Apple Watch |
 | `Cardio Recovery (bpm)` | Number | From Apple Watch |
+| `HRV (ms)` | Number | Heart rate variability — from Apple Watch / WHOOP |
 | `Avg HR (bpm)` | Number | Daily average |
 
 ---
@@ -111,7 +112,7 @@ After deploy (see below), paste both Function URLs into Health Auto Export as se
 
 **Metrics webhook** (`metrics-ingest` URL):
 - **Format:** JSON
-- **Data types:** weight_body_mass, lean_body_mass, body_fat_percentage, body_mass_index, resting_heart_rate, sleep_analysis, respiratory_rate, vo2_max, cardio_recovery, heart_rate
+- **Data types:** weight_body_mass, lean_body_mass, body_fat_percentage, body_mass_index, resting_heart_rate, sleep_analysis, respiratory_rate, vo2_max, cardio_recovery, heart_rate, heart_rate_variability
 - **Aggregation:** Daily
 
 ---

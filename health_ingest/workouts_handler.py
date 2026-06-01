@@ -14,15 +14,29 @@ WORKOUT_TYPE_MAP = {
     "Run": "Run",
     "Outdoor Run": "Run",
     "Trail Run": "Run",
+    "Indoor Run": "Run",
     "Functional Strength Training": "Strength",
     "Traditional Strength Training": "Strength",
+    "Core Training": "Strength",
     "Hiking": "Hike",
     "Walking": "Hike",
+    "Outdoor Walk": "Hike",
     "Yoga": "Recovery",
     "Pilates": "Recovery",
     "Stretching": "Recovery",
     "Meditation": "Recovery",
+    "Cool down": "Recovery",
+    "Cycling": "Cycling",
+    "Outdoor Cycling": "Cycling",
+    "Boxing": "Cardio",
+    "Kickboxing": "Cardio",
+    "High Intensity Interval Training": "Cardio",
+    "Paddle Sports": "Cardio",
+    "Elliptical": "Cardio",
+    "Cross Training": "Cardio",
 }
+# Anything not listed (e.g. "Other") falls through to the "Strength" default
+# in build_workout_properties.
 
 # Karvonen HR zones: MaxHR=190, RestHR=65
 ZONE_BOUNDARIES = [
