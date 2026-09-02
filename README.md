@@ -17,10 +17,15 @@ AWS Lambda functions that pipe Apple Health data into Notion databases.
 
 ### Idempotency
 
-Notion has no unique constraint, so "insert only new records" is a check-then-create: query for the key (`Source ID` for workouts, `Date` for metrics), then create if nothing came back. Those two steps are not atomic, and Health Auto Export occasionally POSTs the same payload twice at once, so two concurrent invocations could both pass the check and both insert. Two defences:
+Notion has no unique constraint, so "insert only new records" is a check-then-create: query for the key (`Source ID` for workouts, `Date` for metrics), then create if nothing came back. Those two steps are not atomic, and Health Auto Export occasionally POSTs the same payload twice at once, so two concurrent invocations could both pass the check and both insert. Six duplicate pairs reached Notion this way between 2023 and 2026.
 
-- Both functions pin `reservedConcurrency: 1`, so Lambda serialises them. This is what actually prevents the race; a genuinely simultaneous second POST gets a 429 and Health Auto Export re-sends on its next run.
-- `notion.create_page_once` re-queries after creating and archives all but the earliest page if it finds duplicates. Concurrent callers sort identically, so they agree on which page survives.
+The current defence is `notion.create_page_once`: after creating, it re-queries and archives all but the earliest page if it finds duplicates. Concurrent callers sort identically, so they agree on which page survives, and archiving the same page twice is harmless.
+
+**This is a net, not a fix.** If Notion's query index hasn't caught up in the moment after the write, the verification query won't see the duplicate and it survives.
+
+The airtight fix is `reservedConcurrency: 1` on both functions, which makes Lambda serialise them — a genuinely simultaneous second POST then gets a 429 and Health Auto Export re-sends on its next run. **It is currently not deployable:** this AWS account's Lambda concurrency limit is 10, and AWS rejects any reservation that would drop unreserved capacity below 10, so nothing can be reserved. Request a Service Quotas increase for Lambda → *Concurrent executions*, then restore both lines in `serverless.yml`.
+
+Existing duplicates were cleaned up with the untracked `scripts/dedupe.py` (dry-run by default, `--apply` to archive).
 
 ---
 

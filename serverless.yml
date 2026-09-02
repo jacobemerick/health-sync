@@ -20,14 +20,15 @@ functions:
   workouts-ingest:
     handler: health_ingest/workouts_handler.handler
     timeout: 30
-    # Notion has no unique constraint, so idempotency is a check-then-create and
-    # two concurrent invocations can both insert. Health Auto Export does
-    # occasionally POST the same payload twice; serialising the function is what
-    # actually prevents the duplicate rows.
-    reservedConcurrency: 1
+    # NOTE: `reservedConcurrency: 1` belongs here — serialising the function is
+    # the only airtight fix for the duplicate-row race (see README → Idempotency).
+    # It is removed for now because this account's Lambda concurrency limit is 10,
+    # and AWS refuses any reservation that drops unreserved capacity below 10 —
+    # so zero can be reserved. Restore both once a Service Quotas increase for
+    # "Concurrent executions" is granted. Until then create_page_once is the only
+    # defence.
     url: true  # Lambda Function URL — workouts webhook in Health Auto Export
   metrics-ingest:
     handler: health_ingest/metrics_handler.handler
     timeout: 30
-    reservedConcurrency: 1  # see workouts-ingest
     url: true  # Lambda Function URL — metrics webhook in Health Auto Export
