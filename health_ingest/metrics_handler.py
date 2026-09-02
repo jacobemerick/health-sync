@@ -136,26 +136,34 @@ def handler(event, context):
         try:
             props = build_body_metrics_properties(date_str, metrics_by_name)
             if props:
-                if notion.page_exists_by_date(body_metrics_db, date_str):
-                    print(f"Skipping body metrics for {date_str} (already exists)")
-                    body_skipped += 1
-                else:
-                    notion.create_page(body_metrics_db, props)
+                status = notion.create_page_once(
+                    body_metrics_db,
+                    props,
+                    lambda d=date_str: notion.find_pages_by_date(body_metrics_db, d),
+                )
+                if status == "created":
                     print(f"Ingested body metrics for {date_str}")
                     body_inserted += 1
+                else:
+                    print(f"Skipping body metrics for {date_str} (already exists)")
+                    body_skipped += 1
         except Exception as e:
             print(f"Error processing body metrics for {date_str}: {e}")
 
         try:
             props = build_daily_recovery_properties(date_str, metrics_by_name)
             if props:
-                if notion.page_exists_by_date(daily_recovery_db, date_str):
-                    print(f"Skipping recovery for {date_str} (already exists)")
-                    recovery_skipped += 1
-                else:
-                    notion.create_page(daily_recovery_db, props)
+                status = notion.create_page_once(
+                    daily_recovery_db,
+                    props,
+                    lambda d=date_str: notion.find_pages_by_date(daily_recovery_db, d),
+                )
+                if status == "created":
                     print(f"Ingested recovery for {date_str}")
                     recovery_inserted += 1
+                else:
+                    print(f"Skipping recovery for {date_str} (already exists)")
+                    recovery_skipped += 1
         except Exception as e:
             print(f"Error processing recovery for {date_str}: {e}")
 

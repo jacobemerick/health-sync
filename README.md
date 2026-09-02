@@ -15,6 +15,13 @@ AWS Lambda functions that pipe Apple Health data into Notion databases.
 
 **metrics-ingest** — maps daily body composition and recovery metrics to date-keyed rows across the Body Metrics and Daily Recovery DBs.
 
+### Idempotency
+
+Notion has no unique constraint, so "insert only new records" is a check-then-create: query for the key (`Source ID` for workouts, `Date` for metrics), then create if nothing came back. Those two steps are not atomic, and Health Auto Export occasionally POSTs the same payload twice at once, so two concurrent invocations could both pass the check and both insert. Two defences:
+
+- Both functions pin `reservedConcurrency: 1`, so Lambda serialises them. This is what actually prevents the race; a genuinely simultaneous second POST gets a 429 and Health Auto Export re-sends on its next run.
+- `notion.create_page_once` re-queries after creating and archives all but the earliest page if it finds duplicates. Concurrent callers sort identically, so they agree on which page survives.
+
 ---
 
 ## Notion database schemas

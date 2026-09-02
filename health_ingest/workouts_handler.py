@@ -181,20 +181,29 @@ def handler(event, context):
         source_id = workout.get("id", "")
         name = workout.get("name", "Workout")
         try:
-            if source_id and notion.page_exists_by_source_id(db_id, source_id):
-                print(f"Skipping already-ingested workout: {name} ({source_id})")
-                skipped += 1
-                continue
-
             hr_data = workout.get("heartRateData", [])
             dist_data = workout.get("walkingAndRunningDistance", [])
             zone_stats = (
                 compute_zone_stats(hr_data, dist_data) if hr_data and dist_data else {}
             )
+            props = build_workout_properties(workout, zone_stats)
 
-            notion.create_page(db_id, build_workout_properties(workout, zone_stats))
-            print(f"Ingested workout: {name} ({source_id})")
-            ingested += 1
+            if source_id:
+                status = notion.create_page_once(
+                    db_id,
+                    props,
+                    lambda sid=source_id: notion.find_pages_by_source_id(db_id, sid),
+                )
+            else:
+                notion.create_page(db_id, props)
+                status = "created"
+
+            if status == "created":
+                print(f"Ingested workout: {name} ({source_id})")
+                ingested += 1
+            else:
+                print(f"Skipping already-ingested workout: {name} ({source_id})")
+                skipped += 1
         except Exception as e:
             print(f"Error processing workout {name} ({source_id}): {e}")
 

@@ -143,3 +143,23 @@ describe('empty payload', () => {
     expect(res.data.recovery).toBe(0);
   });
 });
+
+describe('concurrent duplicate delivery', () => {
+  test('two simultaneous identical POSTs leave one live page per date and DB', async () => {
+    await Promise.all([sendPayload(metricsPayload), sendPayload(metricsPayload)]);
+
+    // Body Metrics and Daily Recovery both key on date, so check them apart.
+    const live = notionMock.getLivePages();
+    const bodyDates = live
+      .filter(p => p.properties?.['Weight (lbs)'] !== undefined)
+      .map(p => p.properties['Date'].date.start);
+    const recoveryDates = live
+      .filter(p => p.properties?.['Weight (lbs)'] === undefined)
+      .map(p => p.properties['Date'].date.start);
+
+    expect(bodyDates.length).toBeGreaterThan(0);
+    expect(new Set(bodyDates).size).toBe(bodyDates.length);
+    expect(recoveryDates.length).toBeGreaterThan(0);
+    expect(new Set(recoveryDates).size).toBe(recoveryDates.length);
+  });
+});
