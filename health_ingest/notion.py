@@ -71,10 +71,14 @@ def create_page_once(db_id, properties, find_existing):
 
     Health Auto Export sometimes POSTs the same payload twice, and the existence
     check and the create are not atomic, so two concurrent invocations could both
-    pass the check and both insert. Lambda reserved concurrency (see
-    serverless.yml) is what actually serialises those; this is the safety net for
-    anything that still slips through — after creating we re-query and archive
-    every duplicate but the earliest.
+    pass the check and both insert. After creating we re-query and archive every
+    duplicate but the earliest; concurrent callers sort the same way, so they
+    agree on the keeper and a double archive is harmless.
+
+    This is currently the *only* defence, and it is not airtight — a page that
+    Notion's query index hasn't picked up yet won't be seen by the verification
+    query. Serialising the function with reserved concurrency is the real fix;
+    see the note in serverless.yml for why it isn't deployed.
 
     Returns "created" if this call's page is the one that survived, else
     "skipped".
