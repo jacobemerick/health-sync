@@ -118,3 +118,33 @@ describe('core properties', () => {
     }
   });
 });
+
+describe('concurrent duplicate delivery', () => {
+  test('two simultaneous identical POSTs leave one live page per Source ID', async () => {
+    // Health Auto Export occasionally POSTs the same payload twice at once.
+    // Both invocations can pass the exists-check before either writes, which is
+    // what produced the duplicate rows on 2026-08-23, 08-25 and 08-31.
+    await Promise.all([sendPayload(workoutPayload), sendPayload(workoutPayload)]);
+
+    const live = notionMock.getLivePages();
+    const sourceIds = live.map(
+      p => p.properties?.['Source ID']?.rich_text?.[0]?.text?.content
+    );
+
+    expect(sourceIds.length).toBeGreaterThan(0);
+    expect(new Set(sourceIds).size).toBe(sourceIds.length);
+  });
+
+  test('a duplicate that slips through is archived, not left in the database', async () => {
+    await Promise.all([sendPayload(workoutPayload), sendPayload(workoutPayload)]);
+
+    // Whichever way the race fell, every page written beyond the first for a
+    // given Source ID must have been archived back out. Both racers can pick the
+    // same loser and each send an archive for it, so count distinct pages —
+    // archiving twice is deliberately harmless.
+    const created = notionMock.getPageCalls().length;
+    const archived = new Set(notionMock.getArchiveCalls()).size;
+    const live = notionMock.getLivePages().length;
+    expect(live).toBe(created - archived);
+  });
+});
