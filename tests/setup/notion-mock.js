@@ -1,8 +1,21 @@
 const express = require('express');
 
+// Notion hands properties back in a read shape ({ type: 'number', number: 5 })
+// but takes them in a write shape ({ number: 5 }). The handler has to tell a
+// real change from that round trip, so the mock has to reproduce the asymmetry
+// rather than echoing back exactly what it was given.
+function toReadShape(properties = {}) {
+  const out = {};
+  for (const [name, value] of Object.entries(properties)) {
+    const type = Object.keys(value)[0];
+    out[name] = { type, [type]: value[type] };
+  }
+  return out;
+}
+
 class NotionMock {
   constructor() {
-    this.calls = { pages: [], queries: [], archives: [] };
+    this.calls = { pages: [], queries: [], archives: [], updates: [] };
     this.records = [];
     this.nextId = 0;
     this.app = express();
@@ -32,6 +45,10 @@ class NotionMock {
         this.calls.archives.push(req.params.id);
         record.archived = true;
       }
+      if (req.body?.properties) {
+        this.calls.updates.push({ id: req.params.id, properties: req.body.properties });
+        Object.assign(record.body.properties, req.body.properties);
+      }
       res.json({ id: record.id, archived: record.archived, object: 'page' });
     });
 
@@ -55,7 +72,11 @@ class NotionMock {
       }
 
       res.json({
-        results: results.map(r => ({ id: r.id, created_time: r.created_time })),
+        results: results.map(r => ({
+          id: r.id,
+          created_time: r.created_time,
+          properties: toReadShape(r.body.properties),
+        })),
         has_more: false,
       });
     });
@@ -75,7 +96,7 @@ class NotionMock {
   }
 
   clear() {
-    this.calls = { pages: [], queries: [], archives: [] };
+    this.calls = { pages: [], queries: [], archives: [], updates: [] };
     this.records = [];
     this.nextId = 0;
   }
@@ -83,6 +104,7 @@ class NotionMock {
   getPageCalls() { return this.calls.pages; }
   getQueryCalls() { return this.calls.queries; }
   getArchiveCalls() { return this.calls.archives; }
+  getUpdateCalls() { return this.calls.updates; }
 
   // Pages that survived — i.e. what the Notion database would actually show.
   getLivePages() { return this.records.filter(r => !r.archived).map(r => r.body); }

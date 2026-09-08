@@ -7,6 +7,10 @@ Receives POST with shape:
 Writes to two Notion DBs per date:
   - Body Metrics DB: weight, lean body mass, body fat %, BMI
   - Daily Recovery DB: resting HR, sleep, respiratory rate, VO2 max, cardio recovery, avg HR
+
+Each date is upserted rather than inserted: the app POSTs a running snapshot of
+the current day, so a row created early in the morning has to keep absorbing the
+rest of that day's numbers as they sync.
 """
 
 import json
@@ -104,6 +108,35 @@ def build_daily_recovery_properties(date_str, metrics_by_name):
     return props
 
 
+def _new_counts():
+    return {"created": 0, "updated": 0, "skipped": 0}
+
+
+def _upsert_date(db_id, date_str, build_props, metrics_by_name, label, counts):
+    """Upsert one date's row into one DB, tallying the outcome.
+
+    One bad date should not cost us the rest of the payload, so the build and the
+    write are both inside the try: a single malformed entry is logged and counted
+    as nothing rather than raised.
+    """
+    try:
+        props = build_props(date_str, metrics_by_name)
+        if not props:
+            return
+
+        status = notion.upsert_page(
+            db_id,
+            props,
+            lambda: notion.find_pages_by_date(db_id, date_str),
+        )
+    except Exception as e:
+        print(f"Error processing {label} for {date_str}: {e}")
+        return
+
+    counts[status] += 1
+    print(f"{status.capitalize()} {label} for {date_str}")
+
+
 def handler(event, context):
     print("metrics-ingest invoked")
 
@@ -135,52 +168,38 @@ def handler(event, context):
 
     body_metrics_db = os.environ["BODY_METRICS_DB_ID"]
     daily_recovery_db = os.environ["DAILY_RECOVERY_DB_ID"]
-    body_inserted = body_skipped = recovery_inserted = recovery_skipped = 0
+    body_counts = _new_counts()
+    recovery_counts = _new_counts()
 
     for date_str in sorted(all_dates):
-        try:
-            props = build_body_metrics_properties(date_str, metrics_by_name)
-            if props:
-                status = notion.create_page_once(
-                    body_metrics_db,
-                    props,
-                    lambda d=date_str: notion.find_pages_by_date(body_metrics_db, d),
-                )
-                if status == "created":
-                    print(f"Ingested body metrics for {date_str}")
-                    body_inserted += 1
-                else:
-                    print(f"Skipping body metrics for {date_str} (already exists)")
-                    body_skipped += 1
-        except Exception as e:
-            print(f"Error processing body metrics for {date_str}: {e}")
-
-        try:
-            props = build_daily_recovery_properties(date_str, metrics_by_name)
-            if props:
-                status = notion.create_page_once(
-                    daily_recovery_db,
-                    props,
-                    lambda d=date_str: notion.find_pages_by_date(daily_recovery_db, d),
-                )
-                if status == "created":
-                    print(f"Ingested recovery for {date_str}")
-                    recovery_inserted += 1
-                else:
-                    print(f"Skipping recovery for {date_str} (already exists)")
-                    recovery_skipped += 1
-        except Exception as e:
-            print(f"Error processing recovery for {date_str}: {e}")
+        _upsert_date(
+            body_metrics_db,
+            date_str,
+            build_body_metrics_properties,
+            metrics_by_name,
+            "body metrics",
+            body_counts,
+        )
+        _upsert_date(
+            daily_recovery_db,
+            date_str,
+            build_daily_recovery_properties,
+            metrics_by_name,
+            "recovery",
+            recovery_counts,
+        )
 
     return {
         "statusCode": 200,
         "body": json.dumps(
             {
                 "ok": True,
-                "body_metrics": body_inserted,
-                "body_metrics_skipped": body_skipped,
-                "recovery": recovery_inserted,
-                "recovery_skipped": recovery_skipped,
+                "body_metrics": body_counts["created"],
+                "body_metrics_updated": body_counts["updated"],
+                "body_metrics_skipped": body_counts["skipped"],
+                "recovery": recovery_counts["created"],
+                "recovery_updated": recovery_counts["updated"],
+                "recovery_skipped": recovery_counts["skipped"],
             }
         ),
     }
