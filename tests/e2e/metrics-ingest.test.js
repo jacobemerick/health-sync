@@ -134,6 +134,112 @@ describe('idempotency', () => {
   });
 });
 
+describe('partial-day backfill', () => {
+  // Health Auto Export POSTs a running snapshot of today, so the first payload
+  // of the morning is a stub. This is the 2026-09-07 shape: the row was written
+  // at 04:07 local with 41 minutes of sleep and nothing else, then a 15-hour
+  // hike happened and the real numbers arrived later the same day.
+  const DAY = '2026-09-07 00:00:00 -0700';
+  const morningStub = {
+    data: {
+      metrics: [
+        { name: 'sleep_analysis', units: 'hr', data: [{ date: DAY, totalSleep: 0.68 }] },
+      ],
+    },
+  };
+  const fullDay = {
+    data: {
+      metrics: [
+        { name: 'sleep_analysis', units: 'hr', data: [{ date: DAY, totalSleep: 3.7 }] },
+        { name: 'resting_heart_rate', units: 'count/min', data: [{ date: DAY, qty: 58 }] },
+        { name: 'respiratory_rate', units: 'count/min', data: [{ date: DAY, qty: 15.4 }] },
+        { name: 'heart_rate', units: 'count/min', data: [{ date: DAY, Avg: 121 }] },
+      ],
+    },
+  };
+
+  function recoveryRow() {
+    return notionMock
+      .getLivePages()
+      .find(p => p.properties?.['Date']?.date?.start === '2026-09-07');
+  }
+
+  test('later payload fills fields the morning stub never had', async () => {
+    await sendPayload(morningStub);
+    await sendPayload(fullDay);
+
+    const row = recoveryRow();
+    expect(row.properties['Resting HR (bpm)'].number).toBe(58);
+    expect(row.properties['Respiratory Rate (rpm)'].number).toBeCloseTo(15.4, 1);
+    expect(row.properties['Avg HR (bpm)'].number).toBe(121);
+  });
+
+  test('later payload corrects a partial value the stub already held', async () => {
+    await sendPayload(morningStub);
+    expect(recoveryRow().properties['Sleep Duration (hrs)'].number).toBeCloseTo(0.68, 2);
+
+    await sendPayload(fullDay);
+    expect(recoveryRow().properties['Sleep Duration (hrs)'].number).toBeCloseTo(3.7, 2);
+  });
+
+  test('updating reuses the existing row instead of adding one', async () => {
+    await sendPayload(morningStub);
+    await sendPayload(fullDay);
+
+    expect(notionMock.getPageCalls().length).toBe(1);
+    const rows = notionMock
+      .getLivePages()
+      .filter(p => p.properties?.['Date']?.date?.start === '2026-09-07');
+    expect(rows.length).toBe(1);
+  });
+
+  test('only the changed properties are sent in the patch', async () => {
+    await sendPayload(morningStub);
+    await sendPayload(fullDay);
+
+    const patched = notionMock.getUpdateCalls();
+    expect(patched.length).toBe(1);
+    // Name and Date round-trip unchanged, so they must not be rewritten.
+    expect(Object.keys(patched[0].properties).sort()).toEqual([
+      'Avg HR (bpm)',
+      'Respiratory Rate (rpm)',
+      'Resting HR (bpm)',
+      'Sleep Duration (hrs)',
+    ]);
+  });
+
+  test('re-sending an unchanged payload writes nothing', async () => {
+    await sendPayload(fullDay);
+    const res = await sendPayload(fullDay);
+
+    expect(res.data.recovery).toBe(0);
+    expect(res.data.recovery_updated).toBe(0);
+    expect(res.data.recovery_skipped).toBe(1);
+    expect(notionMock.getUpdateCalls().length).toBe(0);
+  });
+
+  test('response reports the update', async () => {
+    await sendPayload(morningStub);
+    const res = await sendPayload(fullDay);
+
+    expect(res.data.recovery).toBe(0);
+    expect(res.data.recovery_updated).toBe(1);
+    expect(res.data.recovery_skipped).toBe(0);
+  });
+
+  test('concurrent updates converge on the same values', async () => {
+    await sendPayload(morningStub);
+    await Promise.all([sendPayload(fullDay), sendPayload(fullDay)]);
+
+    const rows = notionMock
+      .getLivePages()
+      .filter(p => p.properties?.['Date']?.date?.start === '2026-09-07');
+    expect(rows.length).toBe(1);
+    expect(rows[0].properties['Resting HR (bpm)'].number).toBe(58);
+    expect(rows[0].properties['Sleep Duration (hrs)'].number).toBeCloseTo(3.7, 2);
+  });
+});
+
 describe('empty payload', () => {
   test('returns 200 with zero counts for empty metrics array', async () => {
     const res = await sendPayload({ data: { metrics: [] } });

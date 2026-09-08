@@ -15,6 +15,16 @@ AWS Lambda functions that pipe Apple Health data into Notion databases.
 
 **metrics-ingest** — maps daily body composition and recovery metrics to date-keyed rows across the Body Metrics and Daily Recovery DBs.
 
+### Partial days
+
+Health Auto Export POSTs a running snapshot of the current day, not a finished one, so the first payload of the morning carries only what had synced by then. `metrics-ingest` therefore **upserts** each date: if a row for it already exists, the properties whose values differ are PATCHed onto it.
+
+Before this, the handler was create-or-skip, and a row written early in the morning kept those numbers permanently — the `2026-09-07` recovery row was created at 04:07 local holding 41 minutes of sleep and nothing else, and no later payload could touch it.
+
+Only genuinely changed properties are written, so a re-sent payload is a no-op and a date that has settled stops generating writes. The trade-off is that the device is treated as the source of truth: a value edited by hand in Notion will be overwritten if Health Auto Export later re-sends that date.
+
+Workouts are still create-or-skip — they key on `Source ID`, which belongs to a finished workout and never changes after the fact.
+
 ### Idempotency
 
 Notion has no unique constraint, so "insert only new records" is a check-then-create: query for the key (`Source ID` for workouts, `Date` for metrics), then create if nothing came back. Those two steps are not atomic, and Health Auto Export occasionally POSTs the same payload twice at once, so two concurrent invocations could both pass the check and both insert. Six duplicate pairs reached Notion this way between 2023 and 2026.
